@@ -104,8 +104,7 @@ PORT=8000
 NEXT_PUBLIC_LIFF_ID=your-liff-id
 NEXT_PUBLIC_BACKEND_URL=http://localhost:8080
 NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJh...  # anon key
-COMMON_PASSWORD_PREFIX=your-common-password-prefix
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJh...  # anon key (from supabase start output)
 ```
 
 ### 6. Go依存関係のインストール
@@ -153,9 +152,22 @@ npm run dev
 
 各サービスが起動したら、以下のURLにアクセスできます：
 
-- **Backend API**: http://localhost:8080 （ヘルスチェック用）
-- **LINE Bot**: http://localhost:8000 （Webhook用）
-- **LIFF App**: http://localhost:3000 （開発用）
+- **Backend API**: http://localhost:8080/health （ヘルスチェック）
+- **LINE Bot**: http://localhost:8000/health （ヘルスチェック）
+- **LIFF App**: http://localhost:3000 （認証ページ）
+- **LIFF Chat**: http://localhost:3000/home （チャット画面、認証後）
+
+#### LIFF アプリの動作確認
+1. LINEアプリでLIFFを開く、または開発環境で http://localhost:3000 にアクセス
+2. LIFF初期化後、LINE Login画面が表示されます（未ログインの場合）
+3. ログイン成功後、`/login`ページで認証処理が実行されます
+4. 認証完了後、自動的に`/home`へリダイレクトされます
+5. チャット画面でGeminiと会話できます
+
+**認証フローの詳細:**
+```
+/ (LIFF初期化) → LINE Login → /login (Backend API + Supabase認証) → /home (チャット画面)
+```
 - **Supabase Studio**: http://localhost:54323 （DB管理用）
 
 ## 🎯 次のステップ
