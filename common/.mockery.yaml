@@ -1,0 +1,14 @@
+with-expecter: true
+dir: "{{.InterfaceDir}}"
+mockname: "Mock{{.InterfaceName}}"
+outpkg: "{{.PackageName}}"
+filename: "mock_{{.InterfaceName | snakecase}}.go"
+packages:
+  linebot-liff-template/common/llm:
+    interfaces:
+      GoogleGemini:
+  linebot-liff-template/common/repository:
+    interfaces:
+      UserRepo:
+      ConversationRepo:
+      AuthRepo:
