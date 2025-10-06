@@ -47,4 +47,3 @@ func Clean() error {
 	fmt.Println("Cleaning...")
 	return sh.Rm("build")
 }
-
