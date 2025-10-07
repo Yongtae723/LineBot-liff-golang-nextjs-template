@@ -4,15 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"linebot-liff-template/common/models"
-
+	"cookforyou.com/linebot-liff-template/common/models"
 	"github.com/supabase-community/postgrest-go"
 )
 
 type ConversationRepo interface {
 	ListByUserID(ctx context.Context, userID string, limit int) ([]*models.Conversation, error)
 	Create(ctx context.Context, conv *models.Conversation) error
-	DeleteByUserID(ctx context.Context, userID string) error
 }
 
 type conversationRepo struct {
@@ -21,6 +19,15 @@ type conversationRepo struct {
 
 func NewConversationRepo() ConversationRepo {
 	return &conversationRepo{BaseRepo: baseRepo}
+}
+
+func (r *conversationRepo) toMap(conversation *models.Conversation) map[string]any {
+	return map[string]any{
+		"id":      conversation.ID,
+		"user_id": conversation.UserID,
+		"role":    conversation.Role,
+		"content": conversation.Content,
+	}
 }
 
 func (r *conversationRepo) ListByUserID(ctx context.Context, userID string, limit int) ([]*models.Conversation, error) {
@@ -39,21 +46,10 @@ func (r *conversationRepo) ListByUserID(ctx context.Context, userID string, limi
 
 func (r *conversationRepo) Create(ctx context.Context, conv *models.Conversation) error {
 	_, _, err := r.Client.From("conversations").
-		Insert(conv, false, "", "", "").
+		Insert(r.toMap(conv), false, "", "", "").
 		Execute()
 	if err != nil {
 		return fmt.Errorf("repository: failed to create conversation: %w", err)
-	}
-	return nil
-}
-
-func (r *conversationRepo) DeleteByUserID(ctx context.Context, userID string) error {
-	_, _, err := r.Client.From("conversations").
-		Delete("", "").
-		Eq("user_id", userID).
-		Execute()
-	if err != nil {
-		return fmt.Errorf("repository: failed to delete conversations: %w", err)
 	}
 	return nil
 }

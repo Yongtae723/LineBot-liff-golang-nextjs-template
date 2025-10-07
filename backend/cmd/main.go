@@ -5,11 +5,11 @@ import (
 	"os"
 	"time"
 
+	"cookforyou.com/linebot-liff-template/backend/config"
+	"cookforyou.com/linebot-liff-template/backend/routes"
+	"cookforyou.com/linebot-liff-template/common/repository"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/linebot-liff-template/backend/config"
-	"github.com/linebot-liff-template/backend/routes"
-	"github.com/linebot-liff-template/go_pkg/repository"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )

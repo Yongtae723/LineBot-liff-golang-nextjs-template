@@ -1,5 +1,5 @@
-//go:build mage
-// +build mage
+//go:build tools
+// +build tools
 
 package main
 

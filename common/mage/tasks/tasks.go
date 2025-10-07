@@ -3,9 +3,10 @@
 package tasks
 
 import (
-	"linebot-liff-template/common/mage"
 	"path/filepath"
 	"runtime"
+
+	"cookforyou.com/linebot-liff-template/common/mage"
 
 	"github.com/magefile/mage/sh"
 )

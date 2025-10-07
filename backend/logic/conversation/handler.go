@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"cookforyou.com/linebot-liff-template/common/llm"
+	"cookforyou.com/linebot-liff-template/common/models"
+	"cookforyou.com/linebot-liff-template/common/repository"
 	"github.com/google/uuid"
-	"github.com/linebot-liff-template/go_pkg/llm"
-	"github.com/linebot-liff-template/go_pkg/models"
-	"github.com/linebot-liff-template/go_pkg/repository"
 )
 
 type Handler struct {

@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"linebot-liff-template/common/models"
+	"cookforyou.com/linebot-liff-template/common/models"
 
 	"google.golang.org/genai"
 )

@@ -5,5 +5,5 @@ package main
 
 import (
 	//mage:import
-	_ "linebot-liff-template/common/mage/tasks"
+	_ "cookforyou.com/linebot-liff-template/common/mage/tasks"
 )

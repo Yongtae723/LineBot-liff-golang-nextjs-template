@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"strconv"
 
+	"cookforyou.com/linebot-liff-template/backend/config"
+	"cookforyou.com/linebot-liff-template/backend/logic/conversation"
+	"cookforyou.com/linebot-liff-template/common/llm"
+	"cookforyou.com/linebot-liff-template/common/repository"
 	"github.com/gin-gonic/gin"
-	"github.com/linebot-liff-template/backend/config"
-	"github.com/linebot-liff-template/backend/logic/conversation"
-	"github.com/linebot-liff-template/go_pkg/llm"
-	"github.com/linebot-liff-template/go_pkg/repository"
 )
 
 type ConversationHandler struct{}

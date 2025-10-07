@@ -7,18 +7,23 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/linebot-liff-template/go_pkg/models"
-	"github.com/linebot-liff-template/go_pkg/repository"
+	"cookforyou.com/linebot-liff-template/common/models"
+	"cookforyou.com/linebot-liff-template/common/repository"
 )
 
-type RegisterHandler struct {
+type RegisterMethod interface {
+	RegisterFromAccessToken(ctx context.Context, accessToken string) (string, error)
+	Register(ctx context.Context, lineID, displayName string) (string, error)
+}
+
+type registerHandler struct {
 	userRepo      repository.UserRepo
 	authRepo      repository.AuthRepo
 	lineChannelID string
 }
 
-func NewRegisterHandler(userRepo repository.UserRepo, authRepo repository.AuthRepo, lineChannelID string) *RegisterHandler {
-	return &RegisterHandler{
+func NewRegisterHandler(userRepo repository.UserRepo, authRepo repository.AuthRepo, lineChannelID string) RegisterMethod {
+	return &registerHandler{
 		userRepo:      userRepo,
 		authRepo:      authRepo,
 		lineChannelID: lineChannelID,
@@ -31,7 +36,7 @@ type LineProfile struct {
 	PictureURL  string `json:"pictureUrl"`
 }
 
-func (h *RegisterHandler) Register(ctx context.Context, accessToken string) (string, error) {
+func (h *registerHandler) RegisterFromAccessToken(ctx context.Context, accessToken string) (string, error) {
 	lineProfile, err := h.getLineProfile(accessToken)
 	if err != nil {
 		return "", fmt.Errorf("failed to get LINE profile: %w", err)
@@ -42,49 +47,47 @@ func (h *RegisterHandler) Register(ctx context.Context, accessToken string) (str
 		return user.LineID, nil
 	}
 
+	return h.Register(ctx, lineProfile.UserID, lineProfile.DisplayName)
+}
+
+func (h *registerHandler) Register(ctx context.Context, lineID, displayName string) (string, error) {
+
 	// NOTE: This is a simplified authentication flow for template purposes.
 	// In production, implement proper authentication with:
 	// - LINE Login integration with Supabase Auth
 	// - Proper OAuth flow
 	// - Secure token exchange
 	// - Email verification (if needed)
-	email := lineProfile.UserID
-	password := lineProfile.UserID
+	email := lineID + "@example.com"
+	password := lineID
 
 	userMetadata := map[string]interface{}{
-		"line_id": lineProfile.UserID,
-		"name":    lineProfile.DisplayName,
+		"line_id": lineID,
+		"name":    displayName,
 	}
 	appMetadata := map[string]interface{}{
 		"provider": "line",
 	}
 
 	authUserID, err := h.authRepo.CreateUser(ctx, email, password, userMetadata, appMetadata)
-	if err != nil && err != repository.ErrUserAlreadyExists {
+	if err != nil {
 		return "", fmt.Errorf("failed to create auth user: %w", err)
-	}
-
-	if err == repository.ErrUserAlreadyExists {
-		authUserID, err = h.authRepo.GetUserIDByLineID(ctx, lineProfile.UserID)
-		if err != nil {
-			return "", fmt.Errorf("failed to get existing user: %w", err)
-		}
 	}
 
 	newUser := &models.User{
 		ID:     authUserID,
-		LineID: lineProfile.UserID,
-		Name:   lineProfile.DisplayName,
+		LineID: lineID,
+		Name:   displayName,
 	}
 
 	if err := h.userRepo.Create(ctx, newUser); err != nil {
 		return "", fmt.Errorf("failed to create user: %w", err)
 	}
 
-	return lineProfile.UserID, nil
+	return lineID, nil
 }
 
-func (h *RegisterHandler) getLineProfile(accessToken string) (*LineProfile, error) {
+func (h *registerHandler) getLineProfile(accessToken string) (*LineProfile, error) {
 	if err := h.verifyAccessToken(accessToken); err != nil {
 		return nil, fmt.Errorf("failed to verify access token: %w", err)
 	}
@@ -104,7 +107,7 @@ func (h *RegisterHandler) getLineProfile(accessToken string) (*LineProfile, erro
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("LINE API returned status %d: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("user: LINE API returned status %d: %s", resp.StatusCode, string(body))
 	}
 
 	var profile LineProfile
@@ -115,7 +118,7 @@ func (h *RegisterHandler) getLineProfile(accessToken string) (*LineProfile, erro
 	return &profile, nil
 }
 
-func (h *RegisterHandler) verifyAccessToken(accessToken string) error {
+func (h *registerHandler) verifyAccessToken(accessToken string) error {
 	verifyURL := fmt.Sprintf("https://api.line.me/oauth2/v2.1/verify?access_token=%s", accessToken)
 
 	resp, err := http.Get(verifyURL)
@@ -139,7 +142,7 @@ func (h *RegisterHandler) verifyAccessToken(accessToken string) error {
 
 	// Verify that the token belongs to your LINE channel
 	if result.ClientID != h.lineChannelID {
-		return fmt.Errorf("token is not issued by the expected LINE channel (expected: %s, got: %s)",
+		return fmt.Errorf("user: token is not issued by the expected LINE channel (expected: %s, got: %s)",
 			h.lineChannelID, result.ClientID)
 	}
 

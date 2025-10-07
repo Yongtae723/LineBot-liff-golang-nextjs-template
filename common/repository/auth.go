@@ -2,14 +2,10 @@ package repository
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/supabase-community/gotrue-go/types"
 )
-
-var ErrUserAlreadyExists = errors.New("user already exists")
 
 type AuthRepo interface {
 	CreateUser(ctx context.Context, email string, password string, userMetadata map[string]interface{}, appMetadata map[string]interface{}) (string, error)
@@ -41,12 +37,6 @@ func (r *authRepo) CreateUser(ctx context.Context, email string, password string
 
 	response, err := r.Client.Auth.WithToken(r.BaseRepo.supabaseRoleKey).AdminCreateUser(user)
 	if err != nil {
-		errMsg := strings.ToLower(err.Error())
-		if strings.Contains(errMsg, "already been registered") ||
-			strings.Contains(errMsg, "already exists") ||
-			strings.Contains(errMsg, "duplicate key") {
-			return "", ErrUserAlreadyExists
-		}
 		return "", fmt.Errorf("auth_repo: failed to create user: %w", err)
 	}
 

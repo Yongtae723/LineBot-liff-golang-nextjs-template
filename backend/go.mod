@@ -1,18 +1,17 @@
-module github.com/linebot-liff-template/backend
+module cookforyou.com/linebot-liff-template/backend
 
 go 1.24.2
 
-replace github.com/linebot-liff-template/go_pkg => ../go_pkg
+replace cookforyou.com/linebot-liff-template/common => ../common
 
 require (
 	github.com/gin-gonic/gin v1.11.0
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
-	github.com/linebot-liff-template/go_pkg v0.0.0-00010101000000-000000000000
+	cookforyou.com/linebot-liff-template/common v0.0.0-00010101000000-000000000000
 	github.com/magefile/mage v1.15.0
 	github.com/rs/zerolog v1.34.0
-	github.com/supabase-community/gotrue-go v1.2.1
 )
 
 require (
@@ -47,6 +46,7 @@ require (
 	github.com/quic-go/qpack v0.5.1 // indirect
 	github.com/quic-go/quic-go v0.54.0 // indirect
 	github.com/supabase-community/functions-go v0.0.0-20220927045802-22373e6cb51d // indirect
+	github.com/supabase-community/gotrue-go v1.2.1 // indirect
 	github.com/supabase-community/postgrest-go v0.0.11 // indirect
 	github.com/supabase-community/storage-go v0.7.0 // indirect
 	github.com/supabase-community/supabase-go v0.0.4 // indirect

@@ -2,6 +2,6 @@ go 1.24.2
 
 use (
 	./backend
-	./go_pkg
+	./common
 	./line_bot
 )

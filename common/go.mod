@@ -1,4 +1,4 @@
-module linebot-liff-template/common
+module cookforyou.com/linebot-liff-template/common
 
 go 1.24.2
 
