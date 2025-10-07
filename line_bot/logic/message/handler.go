@@ -1,30 +1,34 @@
-package logic
+package message
 
 import (
 	"context"
 
+	"cookforyou.com/linebot-liff-template/common/llm"
+	"cookforyou.com/linebot-liff-template/common/models"
+	"cookforyou.com/linebot-liff-template/common/repository"
 	"github.com/google/uuid"
-	"github.com/linebot-liff-template/go_pkg/llm"
-	"github.com/linebot-liff-template/go_pkg/models"
-	"github.com/linebot-liff-template/go_pkg/repository"
 	"github.com/rs/zerolog/log"
 )
 
-type MessageHandler struct {
+type MessageHandler interface {
+	HandleTextMessage(ctx context.Context, userID, messageText string) (string, error)
+}
+
+type messageHandler struct {
 	convRepo     repository.ConversationRepo
 	userRepo     repository.UserRepo
 	geminiClient llm.GoogleGemini
 }
 
-func NewMessageHandler(convRepo repository.ConversationRepo, userRepo repository.UserRepo, geminiClient llm.GoogleGemini) *MessageHandler {
-	return &MessageHandler{
+func NewMessageHandler(convRepo repository.ConversationRepo, userRepo repository.UserRepo, geminiClient llm.GoogleGemini) MessageHandler {
+	return &messageHandler{
 		convRepo:     convRepo,
 		userRepo:     userRepo,
 		geminiClient: geminiClient,
 	}
 }
 
-func (h *MessageHandler) HandleTextMessage(ctx context.Context, userID, messageText string) (string, error) {
+func (h *messageHandler) HandleTextMessage(ctx context.Context, userID, messageText string) (string, error) {
 	user, err := h.userRepo.GetByLineID(ctx, userID)
 	if err != nil {
 		log.Error().Err(err).Str("user_id", userID).Msg("User not found")

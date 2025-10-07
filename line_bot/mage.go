@@ -1,5 +1,5 @@
-//go:build mage
-// +build mage
+//go:build tools
+// +build tools
 
 package main
 
@@ -9,4 +9,6 @@ import (
 	"github.com/magefile/mage/mage"
 )
 
-func main() { os.Exit(mage.Main()) }
+func main() {
+	os.Exit(mage.Main())
+}

@@ -1,19 +1,16 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"time"
 
+	"cookforyou.com/linebot-liff-template/line_bot/config"
+	"cookforyou.com/linebot-liff-template/line_bot/routes"
+
+	"cookforyou.com/linebot-liff-template/common/repository"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/line/line-bot-sdk-go/v8/linebot/messaging_api"
-	"github.com/linebot-liff-template/go_pkg/llm"
-	"github.com/linebot-liff-template/go_pkg/repository"
-	"github.com/linebot-liff-template/line_bot/config"
-	"github.com/linebot-liff-template/line_bot/logic"
-	"github.com/linebot-liff-template/line_bot/routes"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -41,34 +38,11 @@ func main() {
 		log.Fatal().Err(err).Msg("Failed to initialize Supabase")
 	}
 
-	bot, err := messaging_api.NewMessagingApiAPI(cfg.LINE_CHANNEL_TOKEN)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to create LINE bot client")
-	}
-
-	userRepo := repository.NewUserRepo()
-	convRepo := repository.NewConversationRepo()
-
-	ctx := context.Background()
-	geminiClient, err := llm.NewGoogleGemini(ctx, cfg.GEMINI_API_KEY, "gemini-2.5-flash-lite")
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to create Gemini client")
-	}
-
-	messageHandler := logic.NewMessageHandler(convRepo, userRepo, geminiClient)
-
-	followHandler, err := logic.NewFollowHandler(cfg.LINE_CHANNEL_TOKEN, cfg.LIFF_APP_URL)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to create follow handler")
-	}
-
-	webhookHandler := routes.NewWebhookHandler(bot, messageHandler, followHandler)
-
 	r := gin.New()
 	r.Use(gin.Recovery())
 	r.Use(gin.Logger())
 
-	routes.SetupRoutes(r, webhookHandler, cfg.LINE_CHANNEL_SECRET)
+	routes.SetupRoutes(r)
 
 	addr := fmt.Sprintf(":%s", cfg.PORT)
 	log.Info().Msgf("Starting LINE Bot server on %s", addr)

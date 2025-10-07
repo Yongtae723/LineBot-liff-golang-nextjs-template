@@ -12,6 +12,7 @@ type Config struct {
 	GEMINI_API_KEY      string
 	BACKEND_URL         string
 	LIFF_APP_URL        string
+	SUPABASE_JWT_SECRET string
 }
 
 func Load() *Config {
@@ -25,6 +26,7 @@ func Load() *Config {
 		GEMINI_API_KEY:      getEnv("GEMINI_API_KEY", ""),
 		BACKEND_URL:         getEnv("BACKEND_URL", "http://localhost:8080"),
 		LIFF_APP_URL:        getEnv("LIFF_APP_URL", "https://liff.line.me/your-liff-id"),
+		SUPABASE_JWT_SECRET: getEnv("SUPABASE_JWT_SECRET", ""),
 	}
 }
 

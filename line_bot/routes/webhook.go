@@ -5,28 +5,26 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"cookforyou.com/linebot-liff-template/line_bot/config"
+	"cookforyou.com/linebot-liff-template/line_bot/logic/follow"
+	"cookforyou.com/linebot-liff-template/line_bot/logic/message"
+
+	"cookforyou.com/linebot-liff-template/common/llm"
+	"cookforyou.com/linebot-liff-template/common/repository"
 	"github.com/gin-gonic/gin"
 	"github.com/line/line-bot-sdk-go/v8/linebot/messaging_api"
 	"github.com/line/line-bot-sdk-go/v8/linebot/webhook"
-	"github.com/linebot-liff-template/line_bot/logic"
 	"github.com/rs/zerolog/log"
 )
 
-type WebhookHandler struct {
-	bot            *messaging_api.MessagingApiAPI
-	messageHandler *logic.MessageHandler
-	followHandler  *logic.FollowHandler
-}
-
-func NewWebhookHandler(bot *messaging_api.MessagingApiAPI, messageHandler *logic.MessageHandler, followHandler *logic.FollowHandler) *WebhookHandler {
-	return &WebhookHandler{
-		bot:            bot,
-		messageHandler: messageHandler,
-		followHandler:  followHandler,
+func HandleWebhook(c *gin.Context) {
+	cfg := config.Load()
+	bot, messageHandler, followHandler, err := setupDependencies(cfg)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
 	}
-}
 
-func (h *WebhookHandler) Handle(c *gin.Context) {
 	body, exists := c.Get("body")
 	if !exists {
 		log.Error().Msg("Request body not found")
@@ -51,9 +49,9 @@ func (h *WebhookHandler) Handle(c *gin.Context) {
 	for _, event := range request.Events {
 		switch e := event.(type) {
 		case webhook.MessageEvent:
-			h.handleMessageEvent(c.Request.Context(), e)
+			handleMessageEvent(c.Request.Context(), e, bot, messageHandler)
 		case webhook.FollowEvent:
-			h.handleFollowEvent(c.Request.Context(), e)
+			handleFollowEvent(c.Request.Context(), e, bot, followHandler)
 		case webhook.UnfollowEvent:
 			log.Info().Interface("event", e).Msg("Unfollow event received")
 		default:
@@ -64,16 +62,45 @@ func (h *WebhookHandler) Handle(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})
 }
 
-func (h *WebhookHandler) handleMessageEvent(ctx context.Context, event webhook.MessageEvent) {
+func setupDependencies(cfg *config.Config) (*messaging_api.MessagingApiAPI, message.MessageHandler, follow.FollowHandler, error) {
+
+	bot, err := messaging_api.NewMessagingApiAPI(cfg.LINE_CHANNEL_TOKEN)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to create LINE bot client")
+		return nil, nil, nil, err
+	}
+
+	userRepo := repository.NewUserRepo()
+	convRepo := repository.NewConversationRepo()
+
+	ctx := context.Background()
+	geminiClient, err := llm.NewGoogleGemini(ctx, cfg.GEMINI_API_KEY, "gemini-2.5-flash-lite")
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to create Gemini client")
+		return nil, nil, nil, err
+	}
+
+	messageHandler := message.NewMessageHandler(convRepo, userRepo, geminiClient)
+
+	followHandler, err := follow.NewFollowHandler(cfg.LINE_CHANNEL_TOKEN, userRepo, cfg.LIFF_APP_URL, cfg.BACKEND_URL)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to create follow handler")
+		return nil, nil, nil, err
+	}
+
+	return bot, messageHandler, followHandler, nil
+}
+
+func handleMessageEvent(ctx context.Context, event webhook.MessageEvent, bot *messaging_api.MessagingApiAPI, messageHandler message.MessageHandler) {
 	switch message := event.Message.(type) {
 	case webhook.TextMessageContent:
 		userID := event.Source.(webhook.UserSource).UserId
-		responseText, err := h.messageHandler.HandleTextMessage(ctx, userID, message.Text)
+		responseText, err := messageHandler.HandleTextMessage(ctx, userID, message.Text)
 		if err != nil {
 			log.Error().Err(err).Msg("Failed to handle text message")
 			return
 		}
-		if err := h.sendMessage(ctx, userID, responseText); err != nil {
+		if err := sendMessage(ctx, userID, responseText, bot); err != nil {
 			log.Error().Err(err).Msg("Failed to send message")
 		}
 	default:
@@ -81,20 +108,20 @@ func (h *WebhookHandler) handleMessageEvent(ctx context.Context, event webhook.M
 	}
 }
 
-func (h *WebhookHandler) handleFollowEvent(ctx context.Context, event webhook.FollowEvent) {
+func handleFollowEvent(ctx context.Context, event webhook.FollowEvent, bot *messaging_api.MessagingApiAPI, followHandler follow.FollowHandler) {
 	userID := event.Source.(webhook.UserSource).UserId
-	welcomeMessage, err := h.followHandler.HandleFollow(ctx, userID)
+	welcomeMessage, err := followHandler.HandleFollow(ctx, userID)
 	if err != nil {
 		log.Error().Err(err).Str("user_id", userID).Msg("Failed to handle follow event")
 		return
 	}
-	if err := h.sendMessage(ctx, userID, welcomeMessage); err != nil {
+	if err := sendMessage(ctx, userID, welcomeMessage, bot); err != nil {
 		log.Error().Err(err).Msg("Failed to send welcome message")
 	}
 }
 
-func (h *WebhookHandler) sendMessage(ctx context.Context, userID, message string) error {
-	_, err := h.bot.PushMessage(&messaging_api.PushMessageRequest{
+func sendMessage(ctx context.Context, userID, message string, bot *messaging_api.MessagingApiAPI) error {
+	_, err := bot.PushMessage(&messaging_api.PushMessageRequest{
 		To: userID,
 		Messages: []messaging_api.MessageInterface{
 			messaging_api.TextMessage{
