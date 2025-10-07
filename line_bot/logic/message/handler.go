@@ -11,7 +11,7 @@ import (
 )
 
 type MessageHandler interface {
-	HandleTextMessage(ctx context.Context, userID, messageText string) (string, error)
+	HandleTextMessage(ctx context.Context, lineID, messageText string) (string, error)
 }
 
 type messageHandler struct {
@@ -28,16 +28,16 @@ func NewMessageHandler(convRepo repository.ConversationRepo, userRepo repository
 	}
 }
 
-func (h *messageHandler) HandleTextMessage(ctx context.Context, userID, messageText string) (string, error) {
-	user, err := h.userRepo.GetByLineID(ctx, userID)
+func (h *messageHandler) HandleTextMessage(ctx context.Context, lineID, messageText string) (string, error) {
+	user, err := h.userRepo.GetByLineID(ctx, lineID)
 	if err != nil {
-		log.Error().Err(err).Str("user_id", userID).Msg("User not found")
-		return "ユーザー登録が必要です。LIFFアプリから登録してください。", nil
+		log.Error().Err(err).Str("line_id", lineID).Msg("Failed to get user ID")
+		return "", err
 	}
 
 	userConv := &models.Conversation{
 		ID:      uuid.New().String(),
-		UserID:  user.LineID,
+		UserID:  user.ID,
 		Role:    models.RoleUser,
 		Content: messageText,
 	}
@@ -46,7 +46,7 @@ func (h *messageHandler) HandleTextMessage(ctx context.Context, userID, messageT
 		return "", err
 	}
 
-	history, err := h.convRepo.ListByUserID(ctx, user.LineID, 20)
+	history, err := h.convRepo.ListByUserID(ctx, user.ID, 20)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to get conversation history")
 		return "", err
@@ -60,7 +60,7 @@ func (h *messageHandler) HandleTextMessage(ctx context.Context, userID, messageT
 
 	assistantConv := &models.Conversation{
 		ID:      uuid.New().String(),
-		UserID:  user.LineID,
+		UserID:  user.ID,
 		Role:    models.RoleAssistant,
 		Content: response,
 	}

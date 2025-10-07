@@ -94,13 +94,17 @@ func setupDependencies(cfg *config.Config) (*messaging_api.MessagingApiAPI, mess
 func handleMessageEvent(ctx context.Context, event webhook.MessageEvent, bot *messaging_api.MessagingApiAPI, messageHandler message.MessageHandler) {
 	switch message := event.Message.(type) {
 	case webhook.TextMessageContent:
-		userID := event.Source.(webhook.UserSource).UserId
-		responseText, err := messageHandler.HandleTextMessage(ctx, userID, message.Text)
+		lineID := event.Source.(webhook.UserSource).UserId
+		responseText, err := messageHandler.HandleTextMessage(ctx, lineID, message.Text)
 		if err != nil {
 			log.Error().Err(err).Msg("Failed to handle text message")
+			err := sendMessage(ctx, lineID, "エラーが発生しました。再度お試しください。", bot)
+			if err != nil {
+				log.Error().Err(err).Msg("Failed to send message")
+			}
 			return
 		}
-		if err := sendMessage(ctx, userID, responseText, bot); err != nil {
+		if err := sendMessage(ctx, lineID, responseText, bot); err != nil {
 			log.Error().Err(err).Msg("Failed to send message")
 		}
 	default:
