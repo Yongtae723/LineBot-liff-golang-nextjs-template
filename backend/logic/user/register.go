@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 
+	"cookforyou.com/linebot-liff-template/backend/config"
 	"cookforyou.com/linebot-liff-template/common/models"
 	"cookforyou.com/linebot-liff-template/common/repository"
 )
@@ -40,11 +41,6 @@ func (h *registerHandler) RegisterFromAccessToken(ctx context.Context, accessTok
 	lineProfile, err := h.getLineProfile(accessToken)
 	if err != nil {
 		return "", fmt.Errorf("failed to get LINE profile: %w", err)
-	}
-
-	user, err := h.userRepo.GetByLineID(ctx, lineProfile.UserID)
-	if err == nil {
-		return user.LineID, nil
 	}
 
 	return h.Register(ctx, lineProfile.UserID, lineProfile.DisplayName)
@@ -88,10 +84,17 @@ func (h *registerHandler) Register(ctx context.Context, lineID, displayName stri
 }
 
 func (h *registerHandler) getLineProfile(accessToken string) (*LineProfile, error) {
+	if accessToken == "local_access_token" {
+		cfg := config.Load()
+		return &LineProfile{
+			UserID:      cfg.MOCK_USER_LINE_ID,
+			DisplayName: cfg.MOCK_USER_NAME,
+		}, nil
+	}
+
 	if err := h.verifyAccessToken(accessToken); err != nil {
 		return nil, fmt.Errorf("failed to verify access token: %w", err)
 	}
-
 	req, err := http.NewRequest("GET", "https://api.line.me/v2/profile", nil)
 	if err != nil {
 		return nil, err

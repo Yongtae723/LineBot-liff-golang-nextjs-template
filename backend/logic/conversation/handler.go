@@ -25,12 +25,7 @@ func NewHandler(convRepo repository.ConversationRepo, userRepo repository.UserRe
 }
 
 func (h *Handler) GetHistory(ctx context.Context, userID string, limit int) ([]*models.Conversation, error) {
-	user, err := h.userRepo.GetByID(ctx, userID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get user: %w", err)
-	}
-
-	conversations, err := h.convRepo.ListByUserID(ctx, user.LineID, limit)
+	conversations, err := h.convRepo.ListByUserID(ctx, userID, limit)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get conversations: %w", err)
 	}
@@ -39,14 +34,9 @@ func (h *Handler) GetHistory(ctx context.Context, userID string, limit int) ([]*
 }
 
 func (h *Handler) ProcessMessage(ctx context.Context, userID string, message string) (string, error) {
-	user, err := h.userRepo.GetByID(ctx, userID)
-	if err != nil {
-		return "", fmt.Errorf("failed to get user: %w", err)
-	}
-
 	userConv := &models.Conversation{
 		ID:      uuid.New().String(),
-		UserID:  user.LineID,
+		UserID:  userID,
 		Role:    models.RoleUser,
 		Content: message,
 	}
@@ -54,7 +44,7 @@ func (h *Handler) ProcessMessage(ctx context.Context, userID string, message str
 		return "", fmt.Errorf("failed to save user message: %w", err)
 	}
 
-	history, err := h.convRepo.ListByUserID(ctx, user.LineID, 20)
+	history, err := h.convRepo.ListByUserID(ctx, userID, 20)
 	if err != nil {
 		return "", fmt.Errorf("failed to get history: %w", err)
 	}
@@ -66,7 +56,7 @@ func (h *Handler) ProcessMessage(ctx context.Context, userID string, message str
 
 	assistantConv := &models.Conversation{
 		ID:      uuid.New().String(),
-		UserID:  user.LineID,
+		UserID:  userID,
 		Role:    models.RoleAssistant,
 		Content: response,
 	}
