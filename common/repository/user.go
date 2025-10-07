@@ -14,7 +14,6 @@ type UserRepo interface {
 	GetByID(ctx context.Context, id string) (*models.User, error)
 	GetByLineID(ctx context.Context, lineID string) (*models.User, error)
 	Create(ctx context.Context, user *models.User) error
-	Update(ctx context.Context, user *models.User) error
 }
 
 type userRepo struct {
@@ -35,7 +34,7 @@ func (r *userRepo) toMap(user *models.User) map[string]any {
 
 func (r *userRepo) GetByID(ctx context.Context, id string) (*models.User, error) {
 	var users []*models.User
-	_, err := r.Client.From("users").
+	_, err := r.Client.From("user").
 		Select("*", "", false).
 		Eq("id", id).
 		Limit(1, "").
@@ -51,7 +50,7 @@ func (r *userRepo) GetByID(ctx context.Context, id string) (*models.User, error)
 
 func (r *userRepo) GetByLineID(ctx context.Context, lineID string) (*models.User, error) {
 	var users []*models.User
-	_, err := r.Client.From("users").
+	_, err := r.Client.From("user").
 		Select("*", "", false).
 		Eq("line_id", lineID).
 		Limit(1, "").
@@ -66,22 +65,11 @@ func (r *userRepo) GetByLineID(ctx context.Context, lineID string) (*models.User
 }
 
 func (r *userRepo) Create(ctx context.Context, user *models.User) error {
-	_, _, err := r.Client.From("users").
+	_, _, err := r.Client.From("user").
 		Insert(r.toMap(user), false, "", "", "").
 		Execute()
 	if err != nil {
 		return fmt.Errorf("repository: failed to create user: %w", err)
-	}
-	return nil
-}
-
-func (r *userRepo) Update(ctx context.Context, user *models.User) error {
-	_, _, err := r.Client.From("users").
-		Update(user, "", "").
-		Eq("id", user.ID).
-		Execute()
-	if err != nil {
-		return fmt.Errorf("repository: failed to update user: %w", err)
 	}
 	return nil
 }

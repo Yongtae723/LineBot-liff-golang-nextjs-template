@@ -9,7 +9,6 @@ import (
 
 type AuthRepo interface {
 	CreateUser(ctx context.Context, email string, password string, userMetadata map[string]interface{}, appMetadata map[string]interface{}) (string, error)
-	GetUserIDByLineID(ctx context.Context, lineID string) (string, error)
 }
 
 type authRepo struct {
@@ -41,18 +40,4 @@ func (r *authRepo) CreateUser(ctx context.Context, email string, password string
 	}
 
 	return response.ID.String(), nil
-}
-
-func (r *authRepo) GetUserIDByLineID(ctx context.Context, lineID string) (string, error) {
-	response, err := r.Client.Auth.WithToken(r.BaseRepo.supabaseRoleKey).AdminListUsers()
-	if err != nil {
-		return "", fmt.Errorf("auth_repo: failed to get users: %w", err)
-	}
-
-	for _, user := range response.Users {
-		if userLineID, ok := user.UserMetadata["line_id"].(string); ok && userLineID == lineID {
-			return user.ID.String(), nil
-		}
-	}
-	return "", nil
 }

@@ -32,7 +32,7 @@ func (r *conversationRepo) toMap(conversation *models.Conversation) map[string]a
 
 func (r *conversationRepo) ListByUserID(ctx context.Context, userID string, limit int) ([]*models.Conversation, error) {
 	var conversations []*models.Conversation
-	_, err := r.Client.From("conversations").
+	_, err := r.Client.From("conversation").
 		Select("*", "", false).
 		Eq("user_id", userID).
 		Order("created_at", &postgrest.OrderOpts{Ascending: true}).
@@ -45,7 +45,7 @@ func (r *conversationRepo) ListByUserID(ctx context.Context, userID string, limi
 }
 
 func (r *conversationRepo) Create(ctx context.Context, conv *models.Conversation) error {
-	_, _, err := r.Client.From("conversations").
+	_, _, err := r.Client.From("conversation").
 		Insert(r.toMap(conv), false, "", "", "").
 		Execute()
 	if err != nil {
