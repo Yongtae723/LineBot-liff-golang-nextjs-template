@@ -10,6 +10,8 @@ type Config struct {
 	SUPABASE_JWT_SECRET string
 	GEMINI_API_KEY      string
 	LINE_CHANNEL_ID     string
+	MOCK_USER_LINE_ID   string
+	MOCK_USER_NAME      string
 }
 
 func Load() *Config {
@@ -21,6 +23,8 @@ func Load() *Config {
 		SUPABASE_JWT_SECRET: getEnv("SUPABASE_JWT_SECRET", ""),
 		GEMINI_API_KEY:      getEnv("GEMINI_API_KEY", ""),
 		LINE_CHANNEL_ID:     getEnv("LINE_CHANNEL_ID", ""),
+		MOCK_USER_LINE_ID:   getEnv("MOCK_USER_LINE_ID", ""),
+		MOCK_USER_NAME:      getEnv("MOCK_USER_NAME", ""),
 	}
 }
 
