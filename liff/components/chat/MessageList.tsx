@@ -16,7 +16,7 @@ export function MessageList({ conversations }: MessageListProps) {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [conversations]);
+  });
 
   return (
     <ScrollArea className="flex-1 p-4" ref={scrollRef}>
