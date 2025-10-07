@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { loginSupabase } from "@/lib/auth/supabase";
-import { getLineAccessToken, setupLiff } from "@/lib/liff/init";
+import { getLineProfile, setupLiff } from "@/lib/liff/init";
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
@@ -13,8 +13,8 @@ export default function LoginPage() {
       try {
         const redirectTo = searchParams.get("redirectTo") || "/home";
         await setupLiff(redirectTo);
-        const accessToken = await getLineAccessToken();
-        await loginSupabase(accessToken);
+        const { accessToken, lineID } = await getLineProfile();
+        await loginSupabase(accessToken, lineID);
         window.location.href = redirectTo;
       } catch (error) {
         console.error("[Login Page] Error:", error);

@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@line/liff": "^2.27.2",
+    "@line/liff-mock": "^1.0.3",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-slot": "^1.2.3",
