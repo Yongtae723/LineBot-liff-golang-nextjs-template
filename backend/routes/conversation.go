@@ -10,6 +10,7 @@ import (
 	"cookforyou.com/linebot-liff-template/common/llm"
 	"cookforyou.com/linebot-liff-template/common/repository"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 )
 
 type ConversationHandler struct{}
@@ -53,6 +54,7 @@ func (h *ConversationHandler) GetConversations(c *gin.Context) {
 
 	conversations, err := handler.GetHistory(c.Request.Context(), userID.(string), limit)
 	if err != nil {
+		log.Error().Err(err).Str("user_id", userID.(string)).Msg("Failed to get conversations")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -77,6 +79,7 @@ func (h *ConversationHandler) PostConversation(c *gin.Context) {
 	ctx := context.Background()
 	geminiClient, err := llm.NewGoogleGemini(ctx, cfg.GEMINI_API_KEY, "gemini-2.5-flash-lite")
 	if err != nil {
+		log.Error().Err(err).Str("user_id", userID.(string)).Msg("Failed to process message")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

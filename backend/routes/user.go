@@ -38,6 +38,7 @@ func (h *UserHandler) RegisterUserFromLiff(c *gin.Context) {
 
 	lineID, err := registerHandler.RegisterFromAccessToken(c.Request.Context(), req.AccessToken)
 	if err != nil {
+		log.Error().Err(err).Str("access_token", req.AccessToken).Msg("Failed to register user")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -64,7 +65,7 @@ func (h *UserHandler) RegisterBotUser(c *gin.Context) {
 
 	lineID, err := registerHandler.Register(c.Request.Context(), req.LineID, req.DisplayName)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to register user")
+		log.Error().Err(err).Str("line_id", req.LineID).Msg("Failed to register user")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
