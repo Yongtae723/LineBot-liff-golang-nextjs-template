@@ -8,6 +8,9 @@ import (
 	"os"
 
 	"github.com/magefile/mage/sh"
+
+	//mage:import
+	_ "cookforyou.com/linebot-liff-template/common/mage/tasks"
 )
 
 // Run runs the LINE Bot server
