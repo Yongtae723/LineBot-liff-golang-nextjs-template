@@ -67,7 +67,7 @@ func (h *followHandler) buildWelcomeMessage(displayName string) string {
 		return fmt.Sprintf(
 			"こんにちは、%sさん！\n友だち追加ありがとうございます🎉\n\n"+
 				"このBotはGemini AIと会話できるチャットボットです。\n\n"+
-				"📱 初回登録が必要です：\n%s\n\n"+
+				"Liffはこちらよりどうぞ。：\n%s\n\n"+
 				"登録後、メッセージを送ってみてください！",
 			displayName,
 			h.liffAppURL,
@@ -76,7 +76,7 @@ func (h *followHandler) buildWelcomeMessage(displayName string) string {
 	return fmt.Sprintf(
 		"友だち追加ありがとうございます🎉\n\n"+
 			"このBotはGemini AIと会話できるチャットボットです。\n\n"+
-			"📱 初回登録が必要です：\n%s\n\n"+
+			"Liffはこちらよりどうぞ。：\n%s\n\n"+
 			"登録後、メッセージを送ってみてください！",
 		h.liffAppURL,
 	)
