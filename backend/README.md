@@ -39,8 +39,8 @@ ENV=local go run cmd/main.go
 ## 📡 API エンドポイント
 
 ### ユーザー登録
-```
-POST /api/v1/user/register
+```http
+POST /api/v1/user/register/liff
 Content-Type: application/json
 
 {
@@ -48,14 +48,34 @@ Content-Type: application/json
 }
 ```
 
-### 会話履歴取得
+**レスポンス:**
+```json
+{
+  "line_id": "U1234567890abcdef"
+}
 ```
+
+### 会話履歴取得
+```http
 GET /api/v1/conversations?limit=50
 Authorization: Bearer SUPABASE_JWT
 ```
 
-### 会話送信
+**レスポンス:**
+```json
+[
+  {
+    "id": "uuid",
+    "user_id": "line_user_id",
+    "role": "user",
+    "content": "こんにちは",
+    "created_at": "2025-01-01T00:00:00Z"
+  }
+]
 ```
+
+### 会話送信
+```http
 POST /api/v1/conversations
 Authorization: Bearer SUPABASE_JWT
 Content-Type: application/json
@@ -65,9 +85,23 @@ Content-Type: application/json
 }
 ```
 
-### ヘルスチェック
+**レスポンス:**
+```json
+{
+  "response": "こんにちは！何かお手伝いできることはありますか？"
+}
 ```
+
+### ヘルスチェック
+```http
 GET /health
+```
+
+**レスポンス:**
+```json
+{
+  "status": "ok"
+}
 ```
 
 ## 🛠️ 開発コマンド
@@ -112,19 +146,26 @@ backend/
 
 ## 🔒 認証フロー
 
-### 1. ユーザー登録
+### 1. ユーザー登録（LIFF経由）
+
+```
 1. LIFF AppがLINE Access Tokenを取得
-2. `/api/v1/user/register`にAccess Tokenを送信
+2. POST /api/v1/user/register/liff にAccess Tokenを送信
 3. Backend APIがLINE APIでプロフィール取得
 4. Supabase Authにユーザー作成
-5. `users`テーブルにLINE User IDを保存
+5. usersテーブルにLINE User IDを保存
+6. LINE IDを返却
+```
 
 ### 2. 認証済みリクエスト
+
+```
 1. LIFF AppがSupabase JWTを取得
-2. `Authorization: Bearer JWT`ヘッダーで送信
-3. `middleware.Auth()`がJWTを検証
-4. `user_id`をcontextに設定
-5. Handlerで`user_id`を使用
+2. Authorization: Bearer JWT ヘッダーで送信
+3. middleware.Auth()がJWTを検証
+4. user_idをcontextに設定
+5. Handlerでuser_idを使用
+```
 
 ## 🌍 環境変数
 
@@ -136,9 +177,39 @@ backend/
 | `SUPABASE_KEY` | Supabase service role key | - |
 | `SUPABASE_JWT_SECRET` | JWT検証用シークレット | - |
 | `GEMINI_API_KEY` | Google Gemini API Key | - |
-| `COMMON_PASSWORD_PREFIX` | ユーザー登録時のパスワードPrefix | `linebot_` |
+| `LINE_CHANNEL_ID` | LINE Channel ID | - |
+
+## 🐳 Docker
+
+### マルチステージビルド
+
+Dockerfileはマルチステージビルドを使用しており、**プロジェクトのルートディレクトリから実行する必要があります**：
+
+```bash
+# プロジェクトルートディレクトリに移動
+cd /path/to/LineBot-liff-golang-nextjs-template
+
+# イメージビルド（backendディレクトリを指定）
+docker build --platform linux/amd64 -f backend/Dockerfile -t backend-api .
+
+# コンテナ起動
+docker run -p 8080:8080 --env-file backend/.env backend-api
+```
+
+### ビルドプロセス
+
+1. **Build stage**: golang:1.24.2-alpineでrootユーザーとしてビルド実行
+2. **Run stage**: alpine:latestで軽量なランタイム環境を構築
+3. **セキュリティ**: 静的リンクされたバイナリで依存関係を最小化
+
+## 🚀 デプロイ
+
+Dockerfileが用意されているので、お好きな環境にデプロイできます：
+- Google Cloud Run
+- AWS ECS/Fargate
+- Railway
+- Fly.io
 
 ## 📝 ライセンス
 
 MIT License
-
