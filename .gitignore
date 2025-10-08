@@ -1,0 +1,78 @@
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work.sum
+build/
+coverage.txt
+coverage.html
+
+# Mage
+mage_output_file.go
+
+# Mock files (generated)
+**/mock_*.go
+
+# Environment files
+.env
+.env.local
+.env.*.local
+**/env.yaml
+**/.env
+
+# Credentials
+**/*-credential.json
+**/cookgpt-credential.json
+sensitive_key.yaml
+
+# IDE
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Node.js / LIFF
+node_modules/
+.next/
+out/
+dist/
+.turbo/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.vercel/
+.biome/
+
+# Supabase
+.branches/
+.temp/
+supabase/.branches/
+supabase/.temp/
+
+# Docker
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Deployment
+.wrangler/
+wrangler.toml.backup
+
+# Temporary files
+tmp/
+temp/
+*.tmp

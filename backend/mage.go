@@ -1,0 +1,12 @@
+//go:build tools
+// +build tools
+
+package main
+
+import (
+	"os"
+
+	"github.com/magefile/mage/mage"
+)
+
+func main() { os.Exit(mage.Main()) }
