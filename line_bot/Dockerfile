@@ -1,3 +1,5 @@
+# TODO: complete dockerfile
+
 # Build stage
 FROM golang:1.24.2-alpine AS builder
 
@@ -7,15 +9,15 @@ WORKDIR /app
 RUN apk add --no-cache gcc musl-dev
 
 # Copy go.mod and go.sum
-COPY go_pkg/go.mod go_pkg/go.sum /app/go_pkg/
+COPY common/go.mod common/go.sum /app/common/
 COPY line_bot/go.mod line_bot/go.sum /app/line_bot/
 
 # Download dependencies
-RUN cd /app/go_pkg && go mod download
+RUN cd /app/common && go mod download
 RUN cd /app/line_bot && go mod download
 
 # Copy source code
-COPY go_pkg /app/go_pkg
+COPY common /app/common
 COPY line_bot /app/line_bot
 
 # Build application
