@@ -6,15 +6,68 @@
 
 LINE BotとLIFFを使用してGemini LLMと会話できるフルスタックアプリケーションのテンプレートです。LINE Botでの会話とLIFFウェブアプリでの会話が完全に同期されます。
 
+TODO: Blog URLの追加
+このテンプレートを公開した背景や、願いは[Qiitaの記事]()を御覧ください
+
+> 💡 **実例**: このテンプレートは、[CookForYou](https://cookforyou.jp)（料理レシピ提案サービス）の開発で培った知見を元に作成されています。
+
 ## ✨ 主な特徴
+
+
+このレポジトリコードは、lineBotで会話した内容がLIFFにも反映される、ミニマムアプリです。
+
+TODO: APPが動作しているところの動画か画像を入れる
 
 - 🤖 **LINE Bot統合**: LINE Messaging APIを使った自然な会話
 - 🌐 **LIFF Web App**: Next.js製のモダンなチャットUI
 - 🧠 **Gemini LLM**: Google Geminiを使った高度な会話機能
 - 🔄 **会話同期**: LINE BotとLIFFで会話履歴を完全共有
 - 🔐 **堅牢な認証**: LINE認証とSupabase認証の統合
-- 🚀 **本番環境対応**: Docker、Cloud Run、Cloudflare対応
+- 🐳 **Docker対応**: 任意のクラウド環境にデプロイ可能
 - 📦 **モノレポ構成**: Go Workspaceによる効率的な開発
+
+## 🏗️ アーキテクチャ
+
+```mermaid
+graph TD
+    %% ユーザー層（同じ高さに配置）
+    A[LINEユーザー]
+    
+    %% プラットフォーム層（同じ高さに配置）
+    B --> D[LIFF LIFFアプリ<br/>Next.js + TypeScript]
+    A --> B[LINE Platform]
+
+    %% Golangサービス層（共通パッケージで包含）
+    B --> E[LINE Botサービス<br/>Golang]
+    D <--> F[Backend API<br/>Golang]
+    E <--> F
+
+    subgraph Common["共通GOパッケージ"]
+        E
+        F
+    end
+
+    E <--> H[(Supabase<br/>データベース)]
+    F <--> H
+
+    E <--> I[Gemini API<br/>LLMサービス]
+    F <--> I
+
+    %% スタイリングで役割を明確に
+    classDef user fill:#e8f4fd,stroke:#1976d2,stroke-width:2px,color:#000
+    classDef service fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    classDef liff fill:#d3d3d3,stroke:#404040,stroke-width:2px,color:#000
+    classDef platform fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
+    classDef shared fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
+    classDef external fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#000
+
+    class A,C user
+    class B platform
+    class D liff
+    class E,F service
+    class Common shared
+    class H,I external
+```
 
 ## 📋 必要な環境
 
@@ -30,7 +83,7 @@ LINE BotとLIFFを使用してGemini LLMと会話できるフルスタックア�
 ### 1. リポジトリのクローン
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/LineBot-liff-golang-nextjs-template.git
+git clone https://github.com/Yongtae723/LineBot-liff-golang-nextjs-template.git
 cd LineBot-liff-golang-nextjs-template
 ```
 
@@ -44,7 +97,6 @@ npm install -g supabase
 
 ```bash
 cd supabase
-supabase init  # 初回のみ実行
 supabase start
 ```
 
@@ -72,11 +124,16 @@ service_role key: eyJh...
 supabase db reset
 ```
 
-これで`users`と`conversations`テーブルが作成されます。
+これで`user`と`conversation`テーブルが作成されます。
 
-**確認**: http://localhost:54323 のTable Editorで`users`と`conversations`テーブルが表示されればOK！
+**確認**: http://localhost:54323 のTable Editorで`user`と`conversation`テーブルが表示されればOK！
 
 ### 5. 環境変数の設定
+Line DeveloperでBotとLineログインを作成して、以下の情報を取得してください。
+- Channel Secret
+- Channel Access Token
+- LIFF ID
+
 
 #### **backend/.env**
 ```bash
@@ -114,7 +171,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJh...  # anon key (from supabase start output)
 go work sync
 
 # 各モジュールの依存関係インストール
-cd go_pkg && go mod download && cd ..
+cd common && go mod download && cd ..
 cd backend && go mod download && cd ..
 cd line_bot && go mod download && cd ..
 ```
@@ -127,6 +184,8 @@ npm install
 ```
 
 ### 8. サービスの起動
+
+アプリには3つのサービスを起動する必要があります。
 
 **Terminal 1: Backend API**
 ```bash
@@ -152,23 +211,10 @@ npm run dev
 
 各サービスが起動したら、以下のURLにアクセスできます：
 
-- **Backend API**: http://localhost:8080/health （ヘルスチェック）
-- **LINE Bot**: http://localhost:8000/health （ヘルスチェック）
-- **LIFF App**: http://localhost:3000 （認証ページ）
-- **LIFF Chat**: http://localhost:3000/home （チャット画面、認証後）
-
-#### LIFF アプリの動作確認
-1. LINEアプリでLIFFを開く、または開発環境で http://localhost:3000 にアクセス
-2. LIFF初期化後、LINE Login画面が表示されます（未ログインの場合）
-3. ログイン成功後、`/login`ページで認証処理が実行されます
-4. 認証完了後、自動的に`/home`へリダイレクトされます
-5. チャット画面でGeminiと会話できます
-
-**認証フローの詳細:**
-```
-/ (LIFF初期化) → LINE Login → /login (Backend API + Supabase認証) → /home (チャット画面)
-```
-- **Supabase Studio**: http://localhost:54323 （DB管理用）
+- **Backend API**: http://localhost:8080/health
+- **LINE Bot**: http://localhost:8000/health
+- **LIFF App**: http://localhost:3000
+- **Supabase Studio**: http://localhost:54323
 
 ## 🎯 次のステップ
 
@@ -194,7 +240,7 @@ npm run dev
 
 ```
 LineBot-liff-golang-nextjs-template/
-├── go_pkg/          # 共通Golangパッケージ
+├── common/          # 共通Golangパッケージ
 │   ├── llm/         # Geminiクライアント
 │   ├── models/      # データモデル
 │   ├── repository/  # Supabaseアクセス層
@@ -208,7 +254,8 @@ LineBot-liff-golang-nextjs-template/
 
 ## 🛠️ 開発コマンド
 
-### Go (backend, line_bot, go_pkg共通)
+### Go (backend, line_bot, common共通)
+各folderで以下のコマンドが使えます。
 
 ```bash
 # テスト実行
@@ -219,9 +266,6 @@ go run mage.go fmt
 
 # リント
 go run mage.go lint
-
-# モック生成
-go run mage.go generate
 
 # 依存関係更新
 go run mage.go update
@@ -265,54 +309,53 @@ supabase migration new <migration_name>
 supabase gen types typescript --local > liff/src/types/supabase.ts
 ```
 
-## 🔧 トラブルシューティング
+## 🚀 デプロイ
 
-### Supabaseが起動しない
+このテンプレートはインフラ非依存です。Dockerfileが用意されているので、お好きな環境にデプロイできます：
 
-```bash
-# 他のプロジェクトのSupabaseを停止
-cd ~/path/to/other/project
-supabase stop
+**Backend & LINE Bot**: Cloud Run、ECS、Railway、Fly.io等  
+**LIFF App**: Cloudflare Pages、Vercel、Netlify等
 
-# このプロジェクトで起動
-cd /Users/yongtae/Documents/personal/code/LineBot-liff-golang-nextjs-template
-supabase start
-```
-
-### マイグレーションが適用されない
-
-```bash
-# マイグレーションファイルを確認
-ls supabase/migrations/
-
-# 強制リセット
-supabase db reset
-```
-
-### Go依存関係エラー
-
-```bash
-# 全モジュールを更新
-cd go_pkg && go mod tidy && cd ..
-cd backend && go mod tidy && cd ..
-cd line_bot && go mod tidy && cd ..
-go work sync
-```
+詳細は各ディレクトリのREADMEを参照してください。
 
 ## 📚 ドキュメント
 
-- [アーキテクチャ](docs/ARCHITECTURE.md) - システムアーキテクチャの詳細
-- [開発ガイド](docs/DEVELOPMENT.md) - 開発者向けガイド
-- [デプロイガイド](docs/DEPLOYMENT.md) - デプロイ手順
-- [API仕様書](docs/API.md) - API仕様書
+- [common/README.md](common/README.md) - 共通パッケージの詳細
+- [backend/README.md](backend/README.md) - Backend API仕様
+- [line_bot/README.md](line_bot/README.md) - LINE Bot設定
+- [liff/README.md](liff/README.md) - LIFF App開発ガイド
+- [supabase/README.md](supabase/README.md) - データベーススキーマ
 
 ## 🤝 コントリビューション
 
-プルリクエストを歓迎します！大きな変更の場合は、まずIssueを開いて変更内容を議論してください。
+プルリクエストを歓迎します！
+(コード抽出時に、間違いが含まれてる可能性もあり。。。)
+大きな変更の場合は、まずIssueを開いて変更内容を議論してください。
 
 ## 📝 ライセンス
 
 MIT License - 詳細は[LICENSE](LICENSE)ファイルをご覧ください。
+
+## 💼 開発・運用サポート
+
+このテンプレートを使った開発や、本番環境へのローンチ、運用について詳しく相談したい方へ：
+
+**フリーランスとして以下のサポートを提供しています：**
+
+- 🛠️ **カスタマイズ開発**: テンプレートをベースにした独自機能の実装
+- 🚀 **ローンチ支援**: インフラ構築、デプロイ、本番環境セットアップ
+- 🔧 **技術コンサルティング**: アーキテクチャ設計、パフォーマンス最適化
+- 📊 **運用サポート**: モニタリング設定、障害対応、スケーリング戦略
+- 📚 **技術研修**: チーム向けのハンズオン研修、コードレビュー
+
+### お問い合わせ
+
+- x: https://twitter.com/Yoooongtae
+- facebook: https://www.facebook.com/yongtaih1
+- email: yong723.enjoy.everything@gmail.com
+
+お気軽にご相談ください！💪
+(私が連絡に気が付きづらいため、複数媒体に連絡していただけると幸いです。)
 
 ## 🙏 謝辞
 
@@ -325,5 +368,4 @@ MIT License - 詳細は[LICENSE](LICENSE)ファイルをご覧ください。
 
 ---
 
-Made with ❤️ for the LINE Bot community
-
+Made with ❤️ by [CookForYou](https://cookforyou.jp) team

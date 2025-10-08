@@ -1,4 +1,4 @@
-# common - Shared Go Package
+# common - 共通Golangパッケージ
 
 このパッケージは、LINE BotとBackend APIの両方で使用される共通のGoコードを含んでいます。
 
@@ -27,24 +27,160 @@ Supabaseデータアクセス層
 ### mage/
 Mageビルドタスク定義
 
-- **commands.go**: 共通コマンド（`RunMockery`, `RunMockgen`）
-- **version.go**: ツールのバージョン定数管理
-- **generate.go**: Generator登録機構
-- **generate/generate.go**: Generatorsスライス
-- **tasks/tasks.go**: 共通タスク定義（Generate, Fmt, Lint, Test, Update）
+- `version.go`: ツールのバージョン定数管理
+- `tasks/tasks.go`: 共通タスク定義（Generate, Fmt, Lint, Test, Update）
 
-## 🚀 開発コマンド
+## 🚀 使い方
+
+### Go Workspaceでの利用
+
+このパッケージは、`backend`と`line_bot`から以下のように参照されます：
+
+```go
+import (
+    "cookforyou.com/linebot-liff-template/common/llm"
+    "cookforyou.com/linebot-liff-template/common/models"
+    "cookforyou.com/linebot-liff-template/common/repository"
+)
+```
+
+### LLMクライアントの使用例
+
+```go
+package main
+
+import (
+    "context"
+    "cookforyou.com/linebot-liff-template/common/llm"
+    "cookforyou.com/linebot-liff-template/common/models"
+)
+
+func main() {
+    ctx := context.Background()
+    
+    // Geminiクライアントの初期化
+    geminiClient, err := llm.NewGoogleGemini(
+        ctx,
+        "your-api-key",
+        "gemini-2.5-flash-lite",
+    )
+    if err != nil {
+        panic(err)
+    }
+    defer geminiClient.Close()
+    
+    // 会話履歴を準備
+    history := []*models.Conversation{
+        {
+            Role:    models.RoleUser,
+            Content: "こんにちは",
+        },
+    }
+    
+    // チャット実行
+    response, err := geminiClient.Chat(ctx, history)
+    if err != nil {
+        panic(err)
+    }
+    
+    println(response)
+}
+```
+
+### リポジトリの使用例
+
+```go
+package main
+
+import (
+    "context"
+    "cookforyou.com/linebot-liff-template/common/models"
+    "cookforyou.com/linebot-liff-template/common/repository"
+)
+
+func main() {
+    // Supabase初期化
+    err := repository.InitSupabase(
+        "http://localhost:54321",
+        "your-service-role-key",
+    )
+    if err != nil {
+        panic(err)
+    }
+    
+    ctx := context.Background()
+    
+    // ユーザーリポジトリ
+    userRepo := repository.NewUserRepo()
+    user, err := userRepo.GetByLineID(ctx, "U1234567890abcdef")
+    
+    // 会話リポジトリ
+    convRepo := repository.NewConversationRepo()
+    conversations, err := convRepo.ListByUserID(ctx, user.LineID, 50)
+}
+```
+
+## 🛠️ 開発コマンド
 
 ```bash
 # 利用可能なタスクを表示
-go run github.com/magefile/mage@latest -l
+go run mage.go -l
 
 # 共通タスク
-go run github.com/magefile/mage@latest generate   # モック生成
-go run github.com/magefile/mage@latest test       # テスト実行
-go run github.com/magefile/mage@latest fmt        # コードフォーマット
-go run github.com/magefile/mage@latest lint       # リント実行
-go run github.com/magefile/mage@latest update     # 依存関係更新
+go run mage.go test       # テスト実行
+go run mage.go fmt        # コードフォーマット
+go run mage.go lint       # リント実行
+go run mage.go update     # 依存関係更新
+```
+
+## 📝 開発ガイド
+
+### 新しいモデルの追加
+
+1. `models/`に新しいファイルを作成
+2. 構造体とタグを定義
+
+```go
+package models
+
+type YourModel struct {
+    ID        string    `json:"id" db:"id"`
+    Field     string    `json:"field" db:"field"`
+    CreatedAt time.Time `json:"created_at" db:"created_at"`
+}
+```
+
+### 新しいリポジトリの追加
+
+1. `repository/`にインターフェースと実装を作成
+
+```go
+package repository
+
+type YourRepo interface {
+    GetByID(ctx context.Context, id string) (*models.YourModel, error)
+    Create(ctx context.Context, model *models.YourModel) error
+}
+
+type yourRepo struct {
+    *BaseRepo
+}
+
+func NewYourRepo() YourRepo {
+    return &yourRepo{BaseRepo: baseRepo}
+}
+```
+
+
+### 新しい共通タスクの追加
+
+`mage/tasks/tasks.go`に関数を追加：
+
+```go
+// YourTask runs your custom task
+func YourTask() error {
+    return sh.RunV("your-command")
+}
 ```
 
 ## 🏗️ Mage構造
@@ -53,32 +189,12 @@ go run github.com/magefile/mage@latest update     # 依存関係更新
 
 ```
 common/mage/
-├── commands.go        # 共通コマンド（RunMockery, RunMockgen）
 ├── version.go         # ツールバージョン定数
-├── generate.go        # Generator登録機構
-├── generate/
-│   └── generate.go    # Generatorsスライス
 └── tasks/
     └── tasks.go       # 共通タスク（Generate, Fmt, Lint, Test, Update）
 ```
 
-各サービス（backend, line_bot）は、これらのタスクをラッパー関数として利用できます。cookLabと同じ構造で、再利用性の高いタスク管理を実現しています。
-
-## 📝 開発ガイド
-
-### 新しいモデルの追加
-1. `models/`に新しいファイルを作成
-2. 構造体とタグを定義
-3. 必要に応じてconstを定義
-
-### 新しいリポジトリの追加
-1. `repository/`にインターフェースと実装を作成
-2. `.mockery.yaml`にインターフェースを追加
-3. `go run github.com/magefile/mage@latest generate`でモックを生成
-
-### 新しい共通タスクの追加
-1. `mage/tasks/tasks.go`に関数を追加
-2. 各サービスの`magefiles/magefile.go`でラッパー関数を作成
+各サービス（backend, line_bot）は、これらのタスクをラッパー関数として利用できます。
 
 ## 📄 ライセンス
 

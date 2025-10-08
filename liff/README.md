@@ -1,19 +1,29 @@
-# LIFF アプリケーション
+# LIFF App (Next.js)
 
-LINE Front-end Framework (LIFF) を使用したチャットアプリケーションです。
+LINE Front-end Framework (LIFF) を使用したチャットアプリケーションです。Next.js 15 (App Router) で構築されています。
 
-## 📋 概要
+## 📦 主な機能
 
-このアプリは、LINEユーザーがWebブラウザ上でGemini AIと会話できるチャットインターフェースを提供します。LINE BotとLIFFで会話履歴が完全に同期されます。
+- ✅ LIFF認証統合
+- ✅ Supabase認証連携
+- ✅ リアルタイムチャットUI
+- ✅ 会話履歴の表示
+- ✅ Gemini LLMとの対話
+- ✅ レスポンシブデザイン
 
-## 🚀 セットアップ
+## 🚀 起動方法
 
-### 1. 環境変数の設定
-
-`.env.example`をコピーして`.env.local`を作成し、必要な値を設定します:
+### 1. 依存関係インストール
 
 ```bash
-cp .env.example .env.local
+npm install
+```
+
+### 2. 環境変数設定
+
+```bash
+cp .env.local.example .env.local
+# .env.localファイルを編集
 ```
 
 ```.env.local
@@ -23,161 +33,260 @@ NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
-### 2. 依存関係のインストール
-
-```bash
-npm install
-```
-
-### 3. 開発サーバーの起動
+### 3. 開発サーバー起動
 
 ```bash
 npm run dev
 ```
 
-アプリは [http://localhost:3000](http://localhost:3000) で起動します。
+アプリは http://localhost:3000 で起動します。
 
-## 📦 主要な技術スタック
+## 🔧 LIFF設定
 
-- **Next.js 15** - App Router
-- **TypeScript** - 型安全性
-- **Tailwind CSS** - スタイリング
-- **shadcn/ui** - UIコンポーネント
-- **@line/liff** - LINE LIFF SDK
-- **@supabase/ssr** - Supabase認証
+### 1. LIFF アプリ作成
 
-## 🏗️ プロジェクト構造
+1. [LINE Developers Console](https://developers.line.biz/console/) にアクセス
+2. Channelを選択 → **LIFF** タブ
+3. **Add** をクリック
 
-```
-liff/
-├── app/
-│   ├── layout.tsx          # ルートレイアウト
-│   ├── page.tsx            # LIFF初期化ページ
-│   ├── login/
-│   │   └── page.tsx        # 認証処理ページ
-│   ├── home/
-│   │   └── page.tsx        # チャット画面（認証後）
-│   └── globals.css         # グローバルスタイル
-├── components/
-│   ├── chat/
-│   │   ├── MessageList.tsx      # メッセージリスト
-│   │   ├── MessageBubble.tsx    # メッセージバブル
-│   │   └── InputBar.tsx         # 入力フォーム
-│   └── ui/                      # shadcn/ui コンポーネント
-├── lib/
-│   ├── auth/
-│   │   └── supabase.ts     # Supabase認証（Server Action）
-│   ├── liff/
-│   │   └── init.ts         # LIFF初期化ロジック
-│   ├── supabase/
-│   │   ├── client.ts       # Supabaseクライアント（ブラウザ）
-│   │   └── server.ts       # Supabaseクライアント（サーバー）
-│   └── api/
-│       └── client.ts       # Backend API クライアント
-├── types/
-│   └── conversation.ts     # 型定義
-├── middleware.ts           # 認証middleware
-└── .env.example            # 環境変数サンプル
-```
+### 2. LIFF設定
 
-## 🔧 開発コマンド
+- **LIFF app name**: 任意の名前
+- **Size**: Full
+- **Endpoint URL**: 
+  - ローカル: `http://localhost:3000`
+  - 本番: `https://your-domain.com`
+- **Scopes**: 
+  - ✅ `profile`
+  - ✅ `openid`
+  - ✅ `email` (オプション)
+
+### 3. LIFF ID取得
+
+作成後に表示される **LIFF ID** を `.env.local` に設定：
 
 ```bash
-npm run dev      # 開発サーバー起動
-npm run build    # 本番ビルド
-npm run start    # 本番サーバー起動
-npm run format   # コードフォーマット（自動修正）
-npm run lint     # リント実行（チェックのみ）
-npm run check    # フォーマット + 型チェック
+NEXT_PUBLIC_LIFF_ID=1234567890-abcdefgh
 ```
-
-### Biome (Formatter & Linter)
-このプロジェクトでは[Biome](https://biomejs.dev/)を使用してコードの品質を保っています。
-
-- **自動フォーマット**: `npm run format`でコードスタイルを統一
-- **リント**: `npm run lint`でコード品質をチェック
-- **設定**: `biome.json`で設定をカスタマイズ可能
-
-## 🌐 LIFF設定
-
-### LINE Developers Console での設定
-
-1. [LINE Developers Console](https://developers.line.biz/console/) にログイン
-2. チャネルを選択
-3. "LIFF" タブから新しいLIFFアプリを追加
-4. 以下の設定を行う:
-   - **Endpoint URL**: `https://your-domain.com` (本番) / `https://your-tunnel-url.ngrok.io` (開発)
-   - **Scope**: `profile` と `openid`
-   - **Module Mode**: OFF（推奨）
-
-5. 発行されたLIFF IDを`.env.local`の`NEXT_PUBLIC_LIFF_ID`に設定
 
 ## 🔐 認証フロー
 
-### ページ構成
-- **`/` (トップページ)**: LIFF初期化専用ページ
-- **`/login`**: 認証処理ページ（Backend API + Supabase）
-- **`/home`**: チャット画面（認証後のみアクセス可能）
+```
+1. ユーザーがLIFFアプリを開く (/)
+   ↓
+2. LIFF SDK初期化 (liff.init)
+   ↓
+3. LINE Access Token取得 (liff.getAccessToken)
+   ↓
+4. Backend API /api/v1/user/register/liff を呼び出し
+   ↓
+5. Backend APIがLINE User情報取得 + Supabase Auth作成 + usersテーブルにUserを新規保存
+   ↓
+6. LINE IDを受け取る
+   ↓
+7. Next.js Middlewareが未認証を検知
+   ↓
+8. /login へリダイレクト
+   ↓
+9. /login でSupabase認証 (signInWithPassword)
+   ↓
+10. JWT取得、セッション確立
+   ↓
+11. /home (チャット画面) へリダイレクト
+```
 
-### 認証の流れ
-1. LIFFアプリを開く（`/`）
-2. LIFF SDK初期化
-3. LINE Login（未ログインの場合、`/home`へリダイレクトURIを設定）
-4. ログイン成功後、middlewareが未認証を検知して`/login`へリダイレクト
-5. `/login`ページで：
-   - LINE Access Token取得
-   - Backend API `/api/v1/user/register` を呼び出し
-   - Backend APIから`line_id`を取得
-   - Supabaseに`signInWithPassword`（email: line_id, password: line_id）
-   - `/home`へリダイレクト
-6. チャット画面表示
+**ページ遷移:**
+- `/` → LIFF初期化（自動）
+- `/login` → Supabase認証処理（middleware経由）
+- `/home` → チャット画面（認証完了後）
 
-### アーキテクチャのポイント
-- **Middleware認証**: Next.jsのmiddlewareで全ページの認証状態をチェック
-- **Server Action**: Supabase認証は`loginSupabase`関数（Server Action）で実行
-- **Backend統合**: ユーザー登録とSupabase Auth Userの作成はBackend APIが担当
-- **セキュリティ**: 
-  - Supabaseセッションを使用してAPI呼び出しを保護
-  - LINE Access Tokenの検証はBackend APIで実施
-  - パスワードはLINE IDをそのまま使用（簡略化）
+## 📁 プロジェクト構造
 
-## 📱 機能
+```
+liff/
+├── src/
+│   ├── app/
+│   │   ├── page.tsx                    # LIFF初期化画面 (/)
+│   │   ├── login/
+│   │   │   └── page.tsx                # Supabase認証処理
+│   │   ├── home/
+│   │   │   └── page.tsx                # チャット画面
+│   │   ├── layout.tsx
+│   │   └── globals.css
+│   ├── components/
+│   │   ├── ui/                         # shadcn/ui コンポーネント
+│   │   └── chat/
+│   │       ├── ChatContainer.tsx
+│   │       ├── MessageBubble.tsx
+│   │       └── InputBar.tsx
+│   ├── lib/
+│   │   ├── supabase/
+│   │   │   ├── client.ts               # Supabaseクライアント
+│   │   │   └── server.ts               # サーバーサイド用
+│   │   ├── api/
+│   │   │   └── client.ts               # Backend API クライアント
+│   │   └── liff/
+│   │       └── init.ts                 # LIFF初期化
+│   ├── types/
+│   │   ├── conversation.ts
+│   │   └── supabase.ts                 # 自動生成
+│   └── middleware.ts                   # 認証チェック、未認証時は/loginへ
+├── public/
+├── .env.local.example
+├── biome.json
+├── next.config.mjs
+├── package.json
+├── tailwind.config.ts
+└── tsconfig.json
+```
 
-- ✅ LIFF認証統合
-- ✅ リアルタイムチャット
-- ✅ 会話履歴の表示
-- ✅ LINE Botとの会話同期
-- ✅ レスポンシブデザイン
+## 🛠️ 開発コマンド
 
-## 🐛 トラブルシューティング
+```bash
+# 開発サーバー起動
+npm run dev
 
-### LIFF認証エラー
+# ビルド
+npm run build
 
-**症状**: "LIFF認証に失敗しました"
+# プロダクションサーバー起動
+npm start
 
-**解決策**:
-- `NEXT_PUBLIC_LIFF_ID`が正しく設定されているか確認
-- LINE Developers ConsoleでLIFF Endpoint URLが正しいか確認
-- LINEアプリ内またはLIFFブラウザで開いているか確認
+# フォーマット
+npm run format
 
-### Backend接続エラー
+# リント
+npm run lint
 
-**症状**: "初期化に失敗しました"
+# 型チェック
+npm run type-check
 
-**解決策**:
-- Backend APIが起動しているか確認（`http://localhost:8080/health`）
-- `NEXT_PUBLIC_BACKEND_URL`が正しく設定されているか確認
-- CORS設定が適切か確認
+# Supabase型定義生成
+npm run gen:types
+```
 
-### Supabase認証エラー
+## 🎨 shadcn/ui コンポーネント
 
-**症状**: "認証に失敗しました"
+このプロジェクトは shadcn/ui を使用しています。
 
-**解決策**:
-- Supabaseが起動しているか確認
-- `NEXT_PUBLIC_SUPABASE_URL`と`NEXT_PUBLIC_SUPABASE_ANON_KEY`が正しいか確認
-- Backend APIでユーザーが正常に作成されているか確認
+### コンポーネント追加
 
+```bash
+npx shadcn@latest add button
+npx shadcn@latest add input
+npx shadcn@latest add card
+```
+
+### 既にインストール済みのコンポーネント
+
+- Button
+- Input
+- Card
+- Avatar
+- ScrollArea
+
+## 🔄 Supabase統合
+
+### クライアントサイド
+
+```typescript
+import { createClient } from '@/lib/supabase/client'
+
+const supabase = createClient()
+const { data: { session } } = await supabase.auth.getSession()
+```
+
+### サーバーサイド
+
+```typescript
+import { createClient } from '@/lib/supabase/server'
+
+const supabase = createClient()
+const { data: { user } } = await supabase.auth.getUser()
+```
+
+### 型定義の自動生成
+
+```bash
+npm run gen:types
+```
+
+これにより `src/types/supabase.ts` が生成されます。
+
+## 🌐 Backend API連携
+
+### API クライアントの使用
+
+```typescript
+import { apiClient } from '@/lib/api/client'
+
+// 会話履歴取得
+const conversations = await apiClient.getConversations(50)
+
+// メッセージ送信
+const response = await apiClient.sendMessage('こんにちは')
+```
+
+APIクライアントは自動的にSupabase JWTをヘッダーに付与します。
+
+## 🚀 デプロイ
+
+### Cloudflare Pages
+
+```bash
+# ビルド
+npm run build
+
+# Cloudflare Pagesにデプロイ
+# Build command: npm run build
+# Build output directory: .next
+```
+
+### Vercel
+
+```bash
+# Vercel CLIインストール
+npm i -g vercel
+
+# デプロイ
+vercel
+```
+
+### Netlify
+
+```bash
+# Netlify CLIインストール
+npm i -g netlify-cli
+
+# デプロイ
+netlify deploy --prod
+```
+
+## 🌍 環境変数（本番環境）
+
+本番環境では以下の環境変数を設定してください：
+
+| 変数名 | 説明 | 例 |
+|--------|------|-----|
+| `NEXT_PUBLIC_LIFF_ID` | LIFF ID | `1234567890-abcdefgh` |
+| `NEXT_PUBLIC_BACKEND_URL` | Backend API URL | `https://api.your-domain.com` |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase URL | `https://xxx.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Anon Key | `eyJh...` |
+
+## 🧪 ローカル開発のTips
+
+### LIFF Simulatorの使用
+
+LIFFアプリはLINEアプリ内で動作しますが、開発時はブラウザでも確認できるようにLiff Mockを使用しています。
+
+```typescript
+export async function setupLiff(redirectTo: string): Promise<void> {
+  if (process.env.NODE_ENV === "development") {
+    await setupMockLiff();
+  } else {
+    await liff.init({ liffId: LIFF_ID });
+  }
+```
 ## 📝 ライセンス
 
 MIT License
