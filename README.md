@@ -9,22 +9,34 @@ LINE BotとLIFFを使用してGemini LLMと会話できるフルスタックア�
 TODO: Blog URLの追加
 このテンプレートを公開した背景や、願いは[Qiitaの記事]()を御覧ください
 
-> 💡 **実例**: このテンプレートは、[CookForYou](https://cookforyou.jp)（料理レシピ提案サービス）の開発で培った知見を元に作成されています。
+> 💡 **実例**: このテンプレートは、[CookForYou](https://cookforyou.jp)（料理レシピ提案サービス）の開発で培った知見を元に作成されています。 以下のQRコード、またはボタンから友達追加して、Lineを通したアプリを体験してみてください。
+
+[![友だち追加はこちらから！](https://img.shields.io/badge/LINE-友だち追加-00C300?style=for-the-badge&logo=line&logoColor=white)](https://line.me/R/ti/p/@807rpwtd)
+
+![QR Code](./images/QR.png)
+
+
+
+
 
 ## ✨ 主な特徴
 
 
-このレポジトリコードは、lineBotで会話した内容がLIFFにも反映される、ミニマムアプリです。
+このレポジトリコードは、lineBotで会話した内容がLIFFにも反映されることで、BotとLIFFの連携を体験する、ミニマムアプリです。
 
-TODO: APPが動作しているところの動画か画像を入れる
+![linebot](./images/linebot.png)
+↑のBotの会話を↓liffでも継続できる
+![liff](./images/liff.png)
 
-- 🤖 **LINE Bot統合**: LINE Messaging APIを使った自然な会話
-- 🌐 **LIFF Web App**: Next.js製のモダンなチャットUI
-- 🧠 **Gemini LLM**: Google Geminiを使った高度な会話機能
-- 🔄 **会話同期**: LINE BotとLIFFで会話履歴を完全共有
-- 🔐 **堅牢な認証**: LINE認証とSupabase認証の統合
-- 🐳 **Docker対応**: 任意のクラウド環境にデプロイ可能
-- 📦 **モノレポ構成**: Go Workspaceによる効率的な開発
+
+- 特徴
+  - 🤖 **LINE Bot統合**: LINE Messaging APIを使った自然な会話
+  - 🌐 **LIFF Web App**: Next.js製のモダンなチャットUI
+  - 🧠 **Gemini LLM**: Google Geminiを使った高度な会話機能
+  - 🔄 **会話同期**: LINE BotとLIFFで会話履歴を完全共有
+  - 🔐 **堅牢な認証**: LINE認証とSupabase認証の統合
+  - 🐳 **Docker対応**: 任意のクラウド環境にデプロイ可能
+  - 📦 **モノレポ構成**: Go Workspaceによる効率的な開発
 
 ## 🏗️ アーキテクチャ
 
