@@ -6,10 +6,9 @@
 
 LINE BotとLIFFを使用してGemini LLMと会話できるフルスタックアプリケーションのテンプレートです。LINE Botでの会話とLIFFウェブアプリでの会話が完全に同期されます。
 
-TODO: Blog URLの追加
-このテンプレートを公開した背景や、願いは[Qiitaの記事]()を御覧ください
+このテンプレートを公開した背景や、願いは[Qiitaの記事](https://qiita.com/yongyong/items/8141d11f44afca65cf36)を御覧ください
 
-> 💡 **実例**: このテンプレートは、[CookForYou](https://cookforyou.jp)（料理レシピ提案サービス）の開発で培った知見を元に作成されています。 以下のQRコード、またはボタンから友達追加して、Lineを通したアプリを体験してみてください。
+> 💡 **実例**: このテンプレートは、[CookForYou](https://cook-for-you.com/landing)（料理レシピ提案サービス）の開発で培った知見を元に作成されています。 以下のQRコード、またはボタンから友達追加して、Lineを通したアプリを体験してみてください。
 
 [![友だち追加はこちらから！](https://img.shields.io/badge/LINE-友だち追加-00C300?style=for-the-badge&logo=line&logoColor=white)](https://line.me/R/ti/p/@807rpwtd)
 
@@ -383,4 +382,4 @@ MIT License - 詳細は[LICENSE](LICENSE)ファイルをご覧ください。
 
 ---
 
-Made with ❤️ by [CookForYou](https://cookforyou.jp) team
+Made with ❤️ by [CookForYou](https://cook-for-you.com/landing) team
