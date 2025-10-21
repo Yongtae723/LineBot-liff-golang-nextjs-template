@@ -9,7 +9,7 @@ LINE BotとLIFFを使用してGemini LLMと会話できるフルスタックア�
 
 このテンプレートを公開した背景や、願いは[Qiitaの記事](https://qiita.com/yongyong/items/8141d11f44afca65cf36)を御覧ください
 
-> 💡 **実例**: このテンプレートは、[CookForYou](https://line.me/R/ti/p/@807rpwtd)（料理レシピ提案サービス）の開発で培った知見を元に作成されています。 以下のQRコード、またはボタンから友達追加して、Lineを通したアプリを体験してみてください。
+> 💡 **実例**: このテンプレートは、[CookForYou](https://line.me/R/ti/p/@807rpwtd)（料理を通して幸せを届けるアプリ）の開発で培った知見を元に作成されています。 以下のQRコード、またはボタンから友達追加して、Lineを通したアプリを体験してみてください。
 
 [![友だち追加はこちらから！](https://img.shields.io/badge/LINE-友だち追加-00C300?style=for-the-badge&logo=line&logoColor=white)](https://line.me/R/ti/p/@807rpwtd)
 
