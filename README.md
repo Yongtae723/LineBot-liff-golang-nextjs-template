@@ -104,10 +104,15 @@ cd LineBot-liff-golang-nextjs-template
 npm install -g supabase
 ```
 
+or 
+
+```bash
+brew install supabase/tap/supabase
+```
+
 ### 3. Supabaseローカル環境の起動
 
 ```bash
-cd supabase
 supabase start
 ```
 
@@ -126,56 +131,17 @@ Started supabase local development setup.
 service_role key: eyJh...
 ```
 
-**📝 重要**: これらの値を控えておいてください（環境変数設定で使用します）
-
-### 4. マイグレーションを適用
-
-```bash
-# マイグレーションを適用（テーブル作成）
-supabase db reset
-```
-
-これで`user`と`conversation`テーブルが作成されます。
-
 **確認**: http://localhost:54323 のTable Editorで`user`と`conversation`テーブルが表示されればOK！
 
-### 5. 環境変数の設定
+### 4. 環境変数の設定
 Line DeveloperでBotとLineログインを作成して、以下の情報を取得してください。
 - Channel Secret
 - Channel Access Token
 - LIFF ID
 
+そして、/backend/.env, /line_bot/.env, /liff/.env.localファイルを作成してください。
 
-#### **backend/.env**
-```bash
-ENV=local
-SUPABASE_URL=http://localhost:54321
-SUPABASE_KEY=eyJh...  # service_role key
-SUPABASE_JWT_SECRET=super-secret-jwt-token-with-at-least-32-characters-long
-GEMINI_API_KEY=your-gemini-api-key
-PORT=8080
-```
-
-#### **line_bot/.env**
-```bash
-ENV=local
-SUPABASE_URL=http://localhost:54321
-SUPABASE_KEY=eyJh...  # service_role key
-GEMINI_API_KEY=your-gemini-api-key
-LINE_CHANNEL_SECRET=your-line-channel-secret
-LINE_CHANNEL_TOKEN=your-line-channel-token
-PORT=8000
-```
-
-#### **liff/.env.local**
-```bash
-NEXT_PUBLIC_LIFF_ID=your-liff-id
-NEXT_PUBLIC_BACKEND_URL=http://localhost:8080
-NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJh...  # anon key (from supabase start output)
-```
-
-### 6. Go依存関係のインストール
+### 5. Go依存関係のインストール
 
 ```bash
 # Workspaceの同期
@@ -187,14 +153,14 @@ cd backend && go mod download && cd ..
 cd line_bot && go mod download && cd ..
 ```
 
-### 7. LIFF依存関係のインストール
+### 6. LIFF依存関係のインストール
 
 ```bash
 cd liff
 npm install
 ```
 
-### 8. サービスの起動
+### 7. サービスの起動
 
 アプリには3つのサービスを起動する必要があります。
 
@@ -235,17 +201,16 @@ npm run dev
 
 1. [LINE Developers Console](https://developers.line.biz/console/) でチャネル作成
 2. **Messaging API**タブ:
-   - Channel Secret → `LINE_CHANNEL_SECRET`
-   - Channel Access Token → `LINE_CHANNEL_TOKEN`
    - Webhook URL: `https://your-domain.com/webhook` (本番環境)
 3. **LIFF**タブ:
    - LIFF URL: `https://your-liff-domain.com`
-   - LIFF ID → `NEXT_PUBLIC_LIFF_ID`
 
 ### Gemini API設定
 
 1. [Google AI Studio](https://aistudio.google.com/app/apikey) でAPI Key作成
 2. API Key → `GEMINI_API_KEY`
+
+以上のstepで、ローカル環境での動作確認ができます。
 
 ## 📦 プロジェクト構造
 
@@ -263,71 +228,6 @@ LineBot-liff-golang-nextjs-template/
 └── docs/            # ドキュメント
 ```
 
-## 🛠️ 開発コマンド
-
-### Go (backend, line_bot, common共通)
-各folderで以下のコマンドが使えます。
-
-```bash
-# テスト実行
-go run mage.go test
-
-# フォーマット
-go run mage.go fmt
-
-# リント
-go run mage.go lint
-
-# 依存関係更新
-go run mage.go update
-```
-
-### LIFF
-
-```bash
-# 開発サーバー起動
-npm run dev
-
-# ビルド
-npm run build
-
-# フォーマット
-npm run format
-
-# リント
-npm run lint
-
-# 型チェック
-npm run type-check
-```
-
-### Supabase
-
-```bash
-# ローカル環境起動
-supabase start
-
-# ローカル環境停止
-supabase stop
-
-# ローカル環境リセット（データ削除）
-supabase db reset
-
-# マイグレーション作成
-supabase migration new <migration_name>
-
-# 型定義生成
-supabase gen types typescript --local > liff/src/types/supabase.ts
-```
-
-## 🚀 デプロイ
-
-このテンプレートはインフラ非依存です。Dockerfileが用意されているので、お好きな環境にデプロイできます：
-
-**Backend & LINE Bot**: Cloud Run、ECS、Railway、Fly.io等  
-**LIFF App**: Cloudflare Pages、Vercel、Netlify等
-
-詳細は各ディレクトリのREADMEを参照してください。
 
 ## 📚 ドキュメント
 
