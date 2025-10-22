@@ -1,9 +1,11 @@
+create type "public"."role" as enum ('user', 'assistant');
+
 create table "public"."conversation" (
     "id" uuid not null default uuid_generate_v4(),
     "user_id" uuid not null default gen_random_uuid(),
-    "role" text not null,
     "content" text not null,
-    "created_at" timestamp with time zone not null default now()
+    "created_at" timestamp with time zone not null default now(),
+    "role" role not null
 );
 
 
@@ -37,10 +39,6 @@ CREATE UNIQUE INDEX users_pkey ON public."user" USING btree (id);
 alter table "public"."conversation" add constraint "conversations_pkey" PRIMARY KEY using index "conversations_pkey";
 
 alter table "public"."user" add constraint "users_pkey" PRIMARY KEY using index "users_pkey";
-
-alter table "public"."conversation" add constraint "conversations_role_check" CHECK ((role = ANY (ARRAY['user'::text, 'assistant'::text]))) not valid;
-
-alter table "public"."conversation" validate constraint "conversations_role_check";
 
 alter table "public"."conversation" add constraint "conversations_user_id_fkey" FOREIGN KEY (user_id) REFERENCES "user"(id) not valid;
 

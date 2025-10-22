@@ -24,8 +24,8 @@ func NewUserRepo() UserRepo {
 	return &userRepo{BaseRepo: baseRepo}
 }
 
-func (r *userRepo) toMap(user *models.User) map[string]any {
-	return map[string]any{
+func (r *userRepo) toMap(user *models.User) map[string]string {
+	return map[string]string{
 		"id":      user.ID,
 		"line_id": user.LineID,
 		"name":    user.Name,

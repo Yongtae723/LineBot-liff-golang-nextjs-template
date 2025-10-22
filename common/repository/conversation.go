@@ -21,11 +21,11 @@ func NewConversationRepo() ConversationRepo {
 	return &conversationRepo{BaseRepo: baseRepo}
 }
 
-func (r *conversationRepo) toMap(conversation *models.Conversation) map[string]any {
-	return map[string]any{
+func (r *conversationRepo) toMap(conversation *models.Conversation) map[string]string {
+	return map[string]string{
 		"id":      conversation.ID,
 		"user_id": conversation.UserID,
-		"role":    conversation.Role,
+		"role":    string(conversation.Role),
 		"content": conversation.Content,
 	}
 }
