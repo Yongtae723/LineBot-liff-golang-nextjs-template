@@ -18,7 +18,7 @@ type Config struct {
 func Load() *Config {
 	return &Config{
 		ENV:                 getEnv("ENV", "local"),
-		PORT:                getEnv("PORT", "8081"),
+		PORT:                getEnv("PORT", "8000"),
 		LINE_CHANNEL_SECRET: getEnv("LINE_CHANNEL_SECRET", ""),
 		LINE_CHANNEL_TOKEN:  getEnv("LINE_CHANNEL_TOKEN", ""),
 		SUPABASE_URL:        getEnv("SUPABASE_URL", ""),
